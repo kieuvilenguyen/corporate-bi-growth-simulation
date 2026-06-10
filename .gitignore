@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IPYNB state
+.ipynb_checkpoints
+
+# Data files (Chặn toàn bộ file dữ liệu trong thư mục data/)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Exclude local master data exported
+*.csv
+*.xlsx
+*.xls
