@@ -1,171 +1,205 @@
 # ITB Commercial Performance & Strategic Growth Analytics
-*An End-to-End Business Intelligence, Star Schema Modeling & Financial Simulation Project (BI9 Competition - Rounds 2 & 3)*
+*End-to-End Business Intelligence, Star Schema Modeling & Financial Simulation — BI9 Competition (Rounds 2 & 3)*
 
 ---
 
-## 📌 1. Business Problem & Context
-**ITB** is a commercial enterprise distributing multiple consumer lines across Vietnam. Despite achieving stellar top-line financial growth, the brand's executive board is facing a critical strategic bottleneck: **The Empty Growth Syndrome**. 
+## 1. Business Problem & Context
 
-While overall revenues are climbing, the customer foundation is silently decaying under extremely high churn rates. Historically, ITB executed a "Bait-and-Funnel" strategy—using low-cost Products A & B as customer acquisition hooks to attract mass-market users, with the expectation of subsequently upgrading them to the premium, cash-cow Product C. 
+**ITB** is a Vietnamese commercial distributor operating across multiple consumer product lines. Despite consistent top-line revenue growth, the company's executive board identified a structural performance anomaly: revenue expansion was accompanied by customer base contraction — indicative of increasing average transaction value from a shrinking, non-recurring customer pool rather than genuine growth.
 
-This project was established to audit this funnel, model a scalable Star Schema Data Warehouse, and execute forward-looking financial simulations to restructure ITB's business model.
+ITB's historical acquisition model relied on low-margin Products A & B as customer entry points, with the expectation that acquired customers would subsequently upgrade to the premium Product C. This project audits the empirical validity of that model and develops forward-looking financial recommendations.
 
-### Key Objectives:
-1. **Audit Funnel Efficiency**: Chronologically evaluate whether Products A & B act as successful transition conduits to the premium Product C.
-2. **Diagnose the Retention Crisis**: Quantify customer decay through quarterly cohort analysis to identify exactly where the "leaky bucket" is occurring.
-3. **Build a Star Schema Data Warehouse**: Transition the flat, messy transactional database into an optimized, normalized dimensional schema ready for BI ingestion.
-4. **Model Forward-Looking Strategic Simulations**: Integrate the new 2025 Website cost structure, calculate Break-even Points (BEP), and simulate 2026 cash-flow reallocations to scale net profits.
+**Analytical Objectives:**
 
-> 📄 **Official Competition Prompts & Guidelines**: You can review the official round requirements and questions in the [Round 02 Requirements](docs/bi9-round2-requirements.pdf) and [Round 03 Requirements](docs/bi9-round3-requirements.pdf).
+1. Evaluate the conversion efficiency of the A/B → C funnel using longitudinal cohort data.
+2. Quantify customer retention through quarterly cohort analysis and 90-day churn measurement.
+3. Construct a normalized Star Schema Data Warehouse for BI tool ingestion.
+4. Model 2025 Website cost re-structuring (BEP) and 2026 strategic capital reallocation scenarios.
 
----
-
-## 🛠️ 2. Analytical Approach & Workflow
-To address these multi-layered challenges, we implemented an end-to-end analytics framework spanning data engineering, diagnostics, schema modeling, and corporate finance forecasting:
-
-[Raw transactional data (5 parts)] ➔ [ETL Data Pipeline & Cleaning] ➔ [Diagnostic Business Analytics] ➔ [Star Schema Warehousing] ➔ [Financial Re-Costing & BEP (2025)] ➔ [Strategic Growth Simulations (2026)]
-
-* **Environment**: VS Code (Jupyter Extension)
-* **Stack**: Python (pandas, numpy, scikit-learn, matplotlib, seaborn, plotly, adjustText) & Power BI.
+> 📄 Official competition prompts: [Round 02 Requirements](docs/bi9-round2-requirements.pdf) | [Round 03 Requirements](docs/bi9-round3-requirements.pdf)
 
 ---
 
-## 🔍 3. Data Engineering & ETL Pipeline (Phase 1)
-The raw transactional database contained over **2.1 million records** across 5 partitioned files. In **`notebooks/01_etl_data_pipeline.ipynb`**, we resolved the following issues to build our single source of truth:
+## 2. Analytical Framework & Technology Stack
 
-1. **Date & Type Standardization**: Preserved correct formats by parsing `order_date` and `dob` into proper `datetime64[ns]` types.
-2. **Categorical Normalization**: Consolidated redundant education levels (e.g., merging "Bachelor's degree" into "Bachelor") and mapped missing categorical values to `'Unknown'`.
-3. **Preserving Referential Integrity**: Discovered and removed **56,435 orphan transactional records** (referencing customer IDs like `-43` that did not exist in the customer dimension), establishing a clean transaction database of **2,051,208 records**.
-4. **Excluding Sparsity Bias**: Excluded the year **2021** from the analytical master dataset because it only recorded a single day of transactional history, which would have heavily skewed YoY trend analyses.
+**Pipeline:**
+
+```
+Raw Transactions (5 parts) → ETL & Cleaning → Diagnostic Analytics → Star Schema Modeling → Financial Simulations
+```
+
+| Layer | Notebook | Scope |
+|-------|----------|-------|
+| Data Engineering | `01_etl_data_pipeline.ipynb` | Ingestion, cleaning, master dataset export |
+| Diagnostic Analytics | `02_diagnostic_business_analytics.ipynb` | Funnel, retention, RFM, channel profitability |
+| Schema Modeling | `03_star_schema_data_modeling.ipynb` | Star Schema construction & CSV export |
+| Financial Modeling | `04_strategic_financial_simulations.ipynb` | BEP (2025), scenario simulations (2026) |
+
+**Environment:** VS Code (Jupyter Extension) | **Stack:** Python (`pandas`, `numpy`, `matplotlib`, `seaborn`) · Power BI
 
 ---
 
-## 📊 4. Diagnostic Analytics: Funnel & Retention Crisis (Phase 2)
-In **`notebooks/02_diagnostic_business_analytics.ipynb`**, we quantified the operational bottlenecks of ITB:
+## 3. Data Engineering & ETL Pipeline
 
-### 4.1. The Growth Paradox ("Empty Growth")
-Our analysis verified a striking mismatch. While revenue grew by **21.2%** from 2022 to 2024, the active customer count plummeted by **-10.57%** in 2023. Top-line growth was artificially sustained by extracting more transactional value from a shrinking, non-recurrent customer base.
+**Source:** 2,107,643 raw transaction records across 5 partitioned CSV files. **`01_etl_data_pipeline.ipynb`** produces a clean analytical master dataset of **2,049,263 records** (2022–2024) through the following operations:
 
-| Year | Annual Revenue (VND) | Gross Profit (VND) | Active Customer Count | Customer YoY Growth (%) |
+1. **Type parsing:** `order_date` and `dob` converted to `datetime64[ns]`.
+2. **Categorical normalization:** Redundant education labels consolidated; missing categorical values imputed as `Unknown`.
+3. **Referential integrity enforcement:** 56,435 orphan transaction records (referencing non-existent customer IDs) removed.
+4. **Temporal scope filter:** Year 2021 excluded — single-day coverage would bias YoY trend analysis.
+
+---
+
+## 4. Diagnostic Analytics
+
+### 4.1. Revenue vs. Customer Base Divergence
+
+Revenue grew 21.2% from 2022 to 2024 while the active customer base contracted 10.6% in 2023, confirming that top-line growth was driven by higher average transaction value rather than customer base expansion.
+
+| Year | Revenue (VND) | Gross Profit (VND) | Active Customers | Customer YoY Δ |
 | :---: | :---: | :---: | :---: | :---: |
-| **2022** | 7,213,973,112,382 | 698,891,680,305 | 406,738 | Baseline |
-| **2023** | 7,097,189,459,768 | 782,153,968,986 | 363,732 | **-10.57%** |
-| **2024** | 8,746,644,109,265 | 760,291,970,111 | 383,421 | +5.41% |
+| 2022 | 7,213,973,112,382 | 698,891,680,305 | 406,738 | Baseline |
+| 2023 | 7,097,189,459,768 | 782,153,968,986 | 363,732 | −10.57% |
+| 2024 | 8,746,644,109,265 | 760,291,970,111 | 383,421 | +5.41% |
 
-### 4.2. Complete Collapse of the Bait Funnel
-The transition "bridge" failed. The volume of new customers acquired via the bait Products A & B fell by **59%**, and their subsequent upgrade rate to the core Product C collapsed from **13.30% in 2022 to an insignificant 2.56% in 2024**.
+### 4.2. Loss-Leader Funnel Conversion
+
+New customer acquisition via Products A & B declined 59% over the period, while the A/B → C conversion rate collapsed from **13.30% (2022)** to **2.56% (2024)**, indicating concurrent top-of-funnel shrinkage and mid-funnel leakage.
 
 <p align="center">
   <img src="assets/charts/bait_funnel_conversion.png" width="85%" />
 </p>
-<p align="center"><i>Figure 4.1: Dramatic shrinkage and leakage of the historical customer acquisition funnel</i></p>
+<p align="center"><i>Figure 1: A/B acquisition volume and A/B → C conversion rate trend (2022–2024)</i></p>
 
-### 4.3. Customer Retention Crisis
-ITB operates with an alarmingly high overall **90-day churn rate of 85.01%**. Cohort analysis shows a steep drop immediately after the first quarter, with **86% to 91% of customers never returning** to make a second purchase.
+### 4.3. Customer Retention
+
+Overall 90-day churn rate: **85.01%**. Cohort analysis confirms 86%–91% of customers do not return after their first purchase quarter, across all acquisition cohorts.
 
 <p align="center">
   <img src="assets/charts/cohort_retention_heatmap.png" width="95%" />
 </p>
-<p align="center"><i>Figure 4.2: Quarterly cohort retention heatmap highlighting the immediate drop-off after Quarter 0</i></p>
+<p align="center"><i>Figure 2: Quarterly cohort retention heatmap (2022–2024)</i></p>
 
 ---
 
-## 🔮 5. Customer Value Profiling & RFM Segmentation
-By segmenting customers into those who bought Product C vs. those who only bought bait products, we proved that Product C buyers are highly engaged and valuable. On average, Product C buyers exhibit **double the purchase frequency** and spend **over 5.3 times more** than other customers.
+## 5. Customer Value Segmentation (RFM)
+
+Customers segmented by Product C purchase history. Product C buyers exhibit significantly superior RFM metrics across all three dimensions:
+
+| RFM Dimension | Product C Buyers | Others | Ratio |
+| :---: | :---: | :---: | :---: |
+| Recency (days) | 314.6 | 469.8 | −33% |
+| Frequency (orders) | 3.33 | 1.93 | +73% |
+| Monetary (VND) | 90,530,016 | 17,063,374 | +430% |
 
 <p align="center">
   <img src="assets/charts/rfm_comparison.png" width="100%" />
 </p>
-<p align="center"><i>Figure 5.1: Comparative RFM metrics proving Product C buyers represent a premium "Golden Segment"</i></p>
+<p align="center"><i>Figure 3: RFM comparison — Product C buyers vs. non-C buyers</i></p>
 
 ---
 
-## 🔒 6. Star Schema Data Warehouse Architecture (Phase 3)
-In **`notebooks/03_star_schema_data_modeling.ipynb`**, the flat master database was modeled into an optimized, standardized Star Schema consisting of **6 Dimension Tables** and **1 Central Fact Table**:
+## 6. Star Schema Data Warehouse
 
-```text
-               [dim_customer]           [dim_product]
-              (customer_key)            (product_key)
-                     │                       │
-                     └───► [fact_order] ◄────┘
-                     ┌───►   (Central)  ◄────┐
-                     │                       │
-                [dim_stores]            [dim_channel]
-                (store_key)             (channel_key)
-                     │                       │
-                     ▼                       ▼
-                [dim_date]           [dim_order_status]
-                (date_key)          (order_status_key)
+**`03_star_schema_data_modeling.ipynb`** transforms the flat master dataset into a Star Schema comprising 1 Fact table and 6 Dimension tables, exported to `data/processed/` as UTF-8-BOM CSVs.
+
 ```
-* **Business Logic**: Surrogate keys were generated to replace natural business keys, ensuring seamless indexing, referential integrity, and high-performance querying in BI tools. All dimensional datasets (`dim_*.csv`) and transaction facts (`fact_order.csv`) are exported into the `data/processed/` directory.
+             [dim_customer]        [dim_product]
+            (customer_key)          (product_key)
+                   │                     │
+                   └──► [fact_order] ◄───┘
+                   ┌──►   (Central)  ◄───┐
+                   │                     │
+             [dim_stores]          [dim_channel]
+             (store_key)           (channel_key)
+                   │                     │
+                   ▼                     ▼
+              [dim_date]      [dim_order_status]
+              (date_key)      (order_status_key)
+```
+
+Surrogate keys replace natural business keys throughout. Online transactions retain `NULL` `store_key` by design. See [`data_dictionary.md`](data_dictionary.md) for full schema specification.
 
 ---
 
-## 🖥️ 7. Interactive Business Intelligence Dashboard
+## 7. Power BI Dashboard
 
-### 7.1. Executive Performance Dashboard
-An interactive executive dashboard was constructed in Power BI to enable C-suite monitoring of core metrics: revenue, net profits, channel margins, and product sales. 
+An interactive executive dashboard monitors core KPIs: revenue, net profit, channel margins, and product mix.
 
-![ITB Executive Dashboard Preview](assets/dashboards/dashboard_preview.png)
+![ITB Executive Dashboard](assets/dashboards/dashboard_preview.png)
 
-### 7.2. Channel Margin & Fixed Cost Mismatch
-The analytics dashboard highlights a massive cost structural mismatch. Physical channels (Store and Premium) are heavily burdened by high retail staff salaries, costing **838.6 Billion VND annually** and dragging net profit margins down to **48.8% - 58.1%**. In contrast, online channels (Website and Ecommerce) represent highly streamlined models, with the Website channel delivering a superior **95.36% net profit margin**.
+### Channel Profitability Analysis
+
+Physical channels (Stores, Premium) bear a shared retail headcount cost of 838.6 B VND/year, compressing net profit margins to 48.8%–58.1%. Digital channels (Website: **95.4%**, Ecommerce: **73.3%**) operate with substantially lower cost structures.
 
 <p align="center">
   <img src="assets/charts/channel_performance_margin.png" width="85%" />
 </p>
-<p align="center"><i>Figure 7.1: Net profit margin trend by channel, showing the superior profitability of online models</i></p>
+<p align="center"><i>Figure 4: Net profit margin by channel (2022–2024)</i></p>
 
 ---
 
-## 💡 8. Forward-Looking Strategic Simulations (Phase 4)
-In **`notebooks/04_strategic_financial_simulations.ipynb`**, we modeled financial forecasts for 2025 and 2026.
+## 8. Strategic Financial Simulations
 
-### 8.1. The 130% BEP Target Paradox (2025)
-Using the new **Website Fee 2025** cost parameters (Fixed Cost: 20.7B VND/year; Variable: PG fee, email marketing, shipping), we calculated:
-*   Website Average Contribution Margin: **10,648,159 VND / order**
-*   Annual Break-even Point (BEP): **1,944 orders / year**
-*   **The Trap:** Targeting 130% BEP (2,527 orders/year) in 2025 would curtail Website transaction volume by **98.6%**, causing a severe **-25.61% revenue drop** at the corporate level. This proves that BEP should only be monitored as a safety net, not targeted as a commercial ceiling.
+### 8.1. Website BEP Analysis (2025)
+
+Under the 2025 cost structure (Fixed: 20.7 B VND/year; Variable: payment gateway 2%, shipping, email acquisition cost):
+
+| Metric | Value |
+| :--- | :--- |
+| Avg. Contribution Margin / Order | 10,648,159 VND |
+| Break-even Volume | 1,944 orders/year |
+| 2024 Actual Website Volume | 186,342 orders/year |
+
+Setting a 130% BEP ceiling as a growth target would constrain Website volume to 2,527 orders — a **−98.6% reduction** from 2024 actuals — producing a **−25.61% corporate revenue contraction**.
 
 <p align="center">
   <img src="assets/charts/revenue_projection_130_bep.png" width="75%" />
 </p>
-<p align="center"><i>Figure 8.1: Negative corporate revenue impact if the Website channel is constrained to 130% BEP</i></p>
+<p align="center"><i>Figure 5: Corporate revenue impact if Website is constrained to 130% BEP (2025)</i></p>
 
-### 8.2. Strategy "A+" Financial Projections (2026)
-We simulated **Strategy A+**—a comprehensive plan that phases out the low-performing Product B, specializes store layouts, renegotiates partner commissions, and reallocates **30% of Stores fixed cost** into Website marketing. 
+### 8.2. Strategy A+ Scenario Simulations (2026)
 
-Assuming a digital ROAS of 5:1 (Base Case) and 6:1 (Optimistic Case), this reallocation model is projected to increase corporate net profits by **+6.85% (+418B VND)** and **+11.34% (+692B VND)** respectively.
+Strategy A+ models the financial impact of phasing out Product B, rationalizing physical store footprint, renegotiating partner commissions, and reinvesting freed capital into Website digital marketing.
+
+| Scenario | 2026 Net Profit | YoY Change |
+| :--- | :---: | :---: |
+| 2024 Baseline | 6,101 B VND | — |
+| A+ Base Case (ROAS 5:1) | 6,519 B VND | **+6.85%** |
+| A+ Optimistic Case (ROAS 6:1) | 6,793 B VND | **+11.34%** |
 
 <p align="center">
   <img src="assets/charts/strategy_aplus_comparison.png" width="80%" />
 </p>
-<p align="center"><i>Figure 8.2: 2026 projected corporate net profit increases under Strategy A+ simulations</i></p>
+<p align="center"><i>Figure 6: 2026 projected net profit under Strategy A+ scenarios</i></p>
 
 ---
 
-## 🚀 9. Actionable Business Recommendations
-1. **Dismantle the Legacy Bait Strategy:** Discontinue Product B immediately and transition Product A from an acquisition hook into a self-sustaining cash cow.
-2. **Reallocate Capital to Digital Channels:** Pivot marketing budgets from high-overhead physical retail stores to direct Website acquisition.
-3. **Establish a Dedicated CRM System:** Focus on retention campaigns and loyalty tiers for Product C buyers to capture their high Customer Lifetime Value (CLV) and resolve the churn crisis.
+## 9. Strategic Recommendations
+
+1. **Discontinue the loss-leader acquisition model.** Product B should be phased out; Product A transitioned to a self-sustaining margin contributor rather than an acquisition subsidy.
+2. **Reallocate capital from physical to digital channels.** Redirect store fixed-cost savings into Website marketing to leverage the channel's 95%+ net profit margin.
+3. **Implement a Product C-focused CRM program.** Direct retention investment toward the high-LTV Product C segment to reduce structural churn.
 
 ---
 
-## 📁 10. Repository Structure & Execution
-```text
+## 10. Repository Structure
+
+```
 BI9-R2-R3-ITB-Analytics/
-├── assets/                     # Diagnostic charts and dashboard previews
-│   ├── charts/                 # Generated matplotlib/seaborn charts
-│   └── dashboards/             # Screenshots of Power BI dashboard
-├── data/                       # Local database folder (Excluded from Git control)
-│   ├── raw/                    # Raw source CSV files
-│   └── processed/              # Cleaned master & Star Schema files
-├── docs/                       # Project guidelines and prompts
-├── notebooks/                  # Step-by-step ETL and analytics pipeline
+├── assets/
+│   ├── charts/                 # Exported matplotlib/seaborn charts
+│   └── dashboards/             # Power BI dashboard screenshots
+├── data/                       # Local data (excluded from Git)
+│   ├── raw/                    # Source CSV files
+│   └── processed/              # Cleaned master & Star Schema exports
+├── docs/                       # Competition guidelines
+├── notebooks/
 │   ├── 01_etl_data_pipeline.ipynb
 │   ├── 02_diagnostic_business_analytics.ipynb
 │   ├── 03_star_schema_data_modeling.ipynb
 │   └── 04_strategic_financial_simulations.ipynb
-├── requirements.txt            # Python dependencies
-├── data_dictionary.md          # Comprehensive data schema dictionary
-└── README.md                   # Project presentation
+├── requirements.txt
+├── data_dictionary.md
+└── README.md
+```
